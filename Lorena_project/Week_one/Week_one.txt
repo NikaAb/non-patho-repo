@@ -8,4 +8,5 @@
 
 12 avril : 
 - j'ai fini le prèmier chapitre d'introduction Shell
--j'ai fini le cours d'introduction to R
+- j'ai fini le cours d'introduction to R
+-
