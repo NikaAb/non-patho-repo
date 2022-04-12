@@ -8,5 +8,6 @@
 
 12 avril : 
 - j'ai fini le prèmier chapitre d'introduction Shell
+- je me suis familiarisé avec le web server d'IMGT/HighV-QUEST
 - j'ai fini le cours d'introduction to R
--
+
