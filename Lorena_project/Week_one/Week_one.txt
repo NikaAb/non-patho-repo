@@ -13,3 +13,9 @@
 
 13 avril:
 - Je me suis familiarisé avec le command line d'IMGT/HighV-QUEST
+- J'ai analisé les 2 repertores avec le web server IGMT/HighV-QUEST
+- J'ai regardé les videos sur command line tutorial
+- J'ai instalé R studio
+- J'ai regardé le video sur R studio
+- J'ai instalé immuneREF
+- J'ai fait le Quickstart
