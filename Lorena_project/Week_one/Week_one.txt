@@ -5,9 +5,11 @@
 - j'ai commencé avec introduction Shell
 
 
-
 12 avril : 
 - j'ai fini le prèmier chapitre d'introduction Shell
 - je me suis familiarisé avec le web server d'IMGT/HighV-QUEST
 - j'ai fini le cours d'introduction to R
 
+
+13 avril:
+- Je me suis familiarisé avec le command line d'IMGT/HighV-QUEST
