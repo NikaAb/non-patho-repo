@@ -23,3 +23,4 @@
 
 14 avril:
 J'ai fait le command line des les 2 repertoires
+J'ai créé le programme pour voir combien des fois se répète les différentes séquences qu'on a trouvées dans le repertoire_one et repertoire_two
