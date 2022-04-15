@@ -1,14 +1,14 @@
 11 avril :
-- j'ai lu le document 
-- j'ai lu les réarrangements V-(D)-J et synthèse des chaînes H et L du livre "Immunologie humaine de Jean-Luc Aymeric et Gérard Lefranc
-- j'ai regardé la vidéo 
-- j'ai commencé avec introduction Shell
+- J'ai lu le document 
+- J'ai lu les réarrangements V-(D)-J et synthèse des chaînes H et L du livre "Immunologie humaine de Jean-Luc Aymeric et Gérard Lefranc
+- J'ai regardé la vidéo 
+- J'ai commencé avec introduction Shell
 
 
 12 avril : 
-- j'ai fini le prèmier chapitre d'introduction Shell
-- je me suis familiarisé avec le web server d'IMGT/HighV-QUEST
-- j'ai fini le cours d'introduction to R
+- J'ai fini le prèmier chapitre d'introduction Shell
+- Je me suis familiarisé avec le web server d'IMGT/HighV-QUEST
+- J'ai fini le cours d'introduction to R
 
 
 13 avril:
@@ -22,5 +22,8 @@
 
 
 14 avril:
-J'ai fait le command line des les 2 repertoires
-J'ai créé le programme pour voir combien des fois se répète les différentes séquences qu'on a trouvées dans le repertoire_one et repertoire_two
+- J'ai fait le command line des les 2 repertoires
+- J'ai créé le programme pour voir combien des fois se répète les différentes séquences qu'on a trouvées dans le repertoire_one et repertoire_two
+
+15 avril:
+-J'ai fait le compte rendu dur immuneREF
