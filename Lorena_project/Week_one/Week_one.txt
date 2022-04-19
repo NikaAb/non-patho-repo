@@ -26,4 +26,5 @@
 - J'ai créé le programme pour voir combien des fois se répète les différentes séquences qu'on a trouvées dans le repertoire_one et repertoire_two
 
 15 avril:
--J'ai fait le compte rendu dur immuneREF
+- J'ai fait le Input de In-depth Tutorial
+- J'ai fait l'analysis of singles freatures de In-depth Tutorial
