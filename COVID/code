@@ -8,26 +8,28 @@ network_features <- analyze_similarity_network(similarity_networks[["Condensed"]
 
 pheatmap::pheatmap(similarity_networks[["Condensed"]],scale='row')
 
+
 #INPUT FORMAT
 getwd()
 
-#Ajouter bien les donees on bessoin les resultats de donees tsv
+#Ajouter bien les donees on bessoin les resultats de donees tsv POUR H3
 setwd("/Users/equipe.lefranc/Documents/Lorena Project/COVID/DONES/H3")
 
 
 dataH3 <- read.table(file = "vquest_airr.tsv", header = TRUE, fill = TRUE, sep = "\t", na.strings=c(""," ","NA"))
 
-library(tidyr)
-dataH3 %>% drop_na(j_call)
+filtered_dataH3<-dataH3[!is.na(dataH3$j_call),]
 
-head(dataH3)
+#head(dataH3)
 
 #names(dataH3)
 
 library(dplyr)
 
-tabH3 <- select(dataH3, sequence_id, sequence_aa, sequence, junction_aa, junction, v_call, d_call, j_call)
+tabH3 <- select(filtered_dataH3, sequence_id, sequence_aa, sequence, junction_aa, junction, v_call, d_call, j_call)
 library(immuneREF)
+
+#Calculer la freq
 
 tabFH3 <- tabH3 %>% 
   
@@ -48,6 +50,7 @@ sum(freqs)
 
 RH3 <- data.frame(tabFH3)
 
+#Separer les données de V
 
 dfvH3 <- data.frame(Name = c(RH3$v_call)) 
 
@@ -64,7 +67,8 @@ repH3.v <- cbind(RH3, dfvH3)
 repH3.v$v_call <- NULL
 repH3.v$Name <- NULL
 repH3.v$v_callH3 <- NULL
-repH3.v$`allele v_call` <- NULL
+
+#Separer les données de D
 
 dfdH3 <- data.frame(Name = c(RH3$d_call)) 
 
@@ -83,6 +87,7 @@ repH3.d$Name <- NULL
 repH3.d$d_callH3 <- NULL
 repH3.d$`allele d_call` <- NULL
 
+#Separer les données de J
 
 dfjH3 <- data.frame(Name = c(RH3$j_call)) 
 
@@ -102,6 +107,8 @@ repH3.j$j_callH3 <- NULL
 repH3.j$`allele j_call` <- NULL
 repH3.j$n <- NULL
 
+#Changer le format de répertoires
+
 repertoireH3 <- data.frame(repH3.j)
 repertoireH3$sequence_aa=as.factor(repertoireH3$sequence_aa)
 repertoireH3$sequence=as.factor(repertoireH3$sequence)                                 
@@ -112,23 +119,35 @@ repertoireH3$d_call=as.factor(repertoireH3$d_call)
 repertoireH3$j_call=as.factor(repertoireH3$j_call)
 hs_ig_h_H3 <- repertoireH3
 
-
+#Unifier les genes pour voir si ils sont dans le germline list
 hs_ig_h_h3v <-hs_ig_h_H3 %>% group_by(v_call) %>% filter (! duplicated(v_call))
 hs_ig_h_h3j <-hs_ig_h_H3 %>% group_by(j_call) %>% filter (! duplicated(j_call))
 
-list_germline_genes$hs$ig$h$V$frequency_uniform
+list_germline_genes$hs$ig$h$V$gene
 hs_ig_h_h3v$v_call
-list_germline_genes$hs$ig$h$J$gene
+hs_ig_h_h3v[65,]$sequence
+list_germline_genes$hs$ig$h$V$sequence
 hs_ig_h_h3j$j_call
 
 setdiff(list_germline_genes$hs$ig$h$V$gene, hs_ig_h_h3v$v_call)
 setdiff(list_germline_genes$hs$ig$h$J$gene, hs_ig_h_h3j$j_call)
 
-typeof(list_germline_genes$hs$ig$h$J$gene[1])
-hs_ig_h_h3j$d_call[7]
+#Dataframe containing V-gene information on new species
+df_species_VDJ<-list()
+
+df_species_VDJ[["V1"]] <- data.frame(gene=c("IGHV2-70D"),allele="14",sequence=c("caggtcaccttgaaggagtctggtcctgcgctggtgaaacccacacagaccctcacactgacctgcaccttctctgggttctcactcagcactagtggaatgcgtgtgagctggatccgtcagcccccaggtaaggccctggagtggcttgcacgcattgattgggatgatgataaattctacagcacatctctgaagaccaggctcaccatctccaaggacacctccaaaaaccaggtggtccttacaatgaccaacatggaccctgtggacacagccacgtattactgtgcacggatac"),species="hs",frequency_uniform=c(0.01), frequency=c(4.147725e-06))
+df_species_VDJ[["V2"]] <- data.frame(gene=c("IGHV3-41"),allele="02",sequence=c("gaggtgcagctggtggagtctgggggaggcttggtccagcctggggggtccctgagactctcctgtgcagcctcaggattctcctttagtagctatggcatgagctgggtccgccaggctccagggaaggggctggactgagtggcacatatctggaatgatggaagtcagaaatactatgcagactctgtgaagggccgattcacaatctccagagacaattctaagagcatgctctatctgcaaatggacagtctgaaagctaaggacacggccatgtattactgtaccaga"),species="hs",frequency_uniform=c(0.01), frequency=c(4.147725e-06))
+df_species_VDJ[["V3"]] <- data.frame(gene=c("IGHV3-43D"),allele="04",sequence=c("gaagtgcagctggtggagtctgggggagtcgtggtacagcctggggggtccctgagactctcctgtgcagcctctggattcacctttgatgattatgccatgcactgggtccgtcaagctccggggaagggtctggagtgggtctctcttattagttgggatggtggtagcacatactatgcagactctgtgaagggtcgattcaccatctccagagacaacagcaaaaactccctgtatctgcaaatgaacagtctgagagctgaggacaccgccttgtattactgtgcaaaagata"),species="hs",frequency_uniform=c(0.01), frequency=c(4.147725e-06))
+
+list_germline_genes$hs$ig$h$V[nrow(list_germline_genes$hs$ig$h$V) + 1,] <- df_species_VDJ[["V1"]]
+list_germline_genes$hs$ig$h$V[nrow(list_germline_genes$hs$ig$h$V) + 1,] <- df_species_VDJ[["V2"]]
+list_germline_genes$hs$ig$h$V[nrow(list_germline_genes$hs$ig$h$V) + 1,] <- df_species_VDJ[["V3"]]
+list_germline_genes$hs$ig$h$V$gene
 
 
-#Ajouter bien les donees on bessoin les resultats de donees tsv
+
+
+#Ajouter bien les donees on bessoin les resultats de donees tsv H4
 setwd("/Users/equipe.lefranc/Documents/Lorena Project/COVID/DONES/H4/")
 
 dataH4 <- read.table(file = "vquest_airr.tsv", header = TRUE, fill = TRUE, sep = "\t")
@@ -236,7 +255,7 @@ list_germline_genes$hs$ig$h$J$gene
 hs_ig_h_h4j$j_call
 
 
-#Ajouter bien les donees on bessoin les resultats de donees tsv
+#Ajouter bien les donees on bessoin les resultats de donees tsv de M5
 setwd("/Users/equipe.lefranc/Documents/Lorena Project/COVID/DONES/M5/")
 
 dataM5 <- read.table(file = "vquest_airr.tsv", header = TRUE, fill = TRUE, sep = "\t")
@@ -340,7 +359,7 @@ hs_ig_h_m5v$v_call
 list_germline_genes$hs$ig$h$J$gene
 hs_ig_h_m5j$j_call
 
-#Ajouter bien les donees on bessoin les resultats de donees tsv
+#Ajouter bien les donees on bessoin les resultats de donees tsv de M6
 setwd("/Users/equipe.lefranc/Documents/Lorena Project/COVID/DONES/M6/")
 
 dataM6 <- read.table(file = "vquest_airr.tsv", header = TRUE, fill = TRUE, sep = "\t")
@@ -444,7 +463,7 @@ hs_ig_h_m6v$v_call
 list_germline_genes$hs$ig$h$J$gene
 hs_ig_h_m6j$j_call
 
-#Ajouter bien les donees on bessoin les resultats de donees tsv
+#Ajouter bien les donees on bessoin les resultats de donees tsv de s24
 setwd("/Users/equipe.lefranc/Documents/Lorena Project/COVID/DONES/S24/")
 
 dataS24 <- read.table(file = "vquest_airr.tsv", header = TRUE, fill = TRUE, sep = "\t")
@@ -549,7 +568,7 @@ list_germline_genes$hs$ig$h$J$gene
 hs_ig_h_s24j$j_call
 
 
-#Ajouter bien les donees on bessoin les resultats de donees tsv
+#Ajouter bien les donees on bessoin les resultats de donees tsv de S26
 setwd("/Users/equipe.lefranc/Documents/Lorena Project/COVID/DONES/S26/")
 
 dataS26 <- read.table(file = "vquest_airr.tsv", header = TRUE, fill = TRUE, sep = "\t")
@@ -655,7 +674,9 @@ hs_ig_h_S26j$j_call
 
 repertoires <- list(hs_ig_h_H3 = hs_ig_h_H3, hs_ig_h_H4= hs_ig_h_H4, hs_ig_h_M5= hs_ig_h_M5, hs_ig_h_M6= hs_ig_h_M6, hs_ig_h_S24= hs_ig_h_S24, hs_ig_h_S26= hs_ig_h_S26)
 
-compatibility_check(repertoire = repertoires[[1]], species = "hs", receptor = "igh") #pour lancer ça on doit activer toujours avant la library(immuneREF)
+compatibility_check(repertoire = hs_ig_h_H3 , species = "hs", receptor = "igh") #pour lancer ça on doit activer toujours avant la library(immuneREF)
+
+#repertoires[[1]]
 
 #ANALYSIS OF SINGLE FEATURES
 #Setting up of reference dataframe
