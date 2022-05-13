@@ -50,6 +50,17 @@ sum(freqs)
 
 RH3 <- data.frame(tabFH3)
 
+# Put the sequence_alignment_aa sequence, without gaps, in the sequence_aa coloumn  
+
+library(stringr)
+
+
+# Version two : without loop
+
+#gsub is for removing gaps from the sequences in sequence_alignment_aa column
+RH3$sequence_aa <- gsub("\\.","",as.character(filtered_dataH3$sequence_alignment_aa))
+
+
 #Separer les données de V
 
 dfvH3 <- data.frame(Name = c(RH3$v_call)) 
@@ -131,6 +142,17 @@ hs_ig_h_h3j$j_call
 
 setdiff(list_germline_genes$hs$ig$h$V$gene, hs_ig_h_h3v$v_call)
 setdiff(list_germline_genes$hs$ig$h$J$gene, hs_ig_h_h3j$j_call)
+
+#replace also the sequence with the v domain sequence
+
+# with gaps
+hs_ig_h_H3$sequence_aa <- filtered_dataH3$sequence_alignment_aa   
+hs_ig_h_H3$sequence <- filtered_dataH3$sequence_alignment
+
+
+# without gaps
+hs_ig_h_H3$sequence_aa <- gsub("\\.","",as.character(filtered_dataH3$sequence_alignment_aa))
+hs_ig_h_H3$sequence <- gsub("\\.","",as.character(filtered_dataH3$sequence_alignment))
 
 #Dataframe containing V-gene information on new species
 df_species_VDJ<-list()
@@ -869,3 +891,5 @@ print_repertoire_comparison(list_repertoires=hs_igh,
                             name_plots="hs_igh",
                             aa_freq_length=17,
                             path_figure="figures")
+
+rlang::last_error()
