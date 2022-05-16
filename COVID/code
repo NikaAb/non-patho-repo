@@ -1,14 +1,3 @@
-#QUICKSTART
-version[['version.string']]
-library(immuneREF)
-
-similarity_networks <- immuneREF_quickstart(repertoire_list = tutorial_repertoires)
-
-network_features <- analyze_similarity_network(similarity_networks[["Condensed"]])
-
-pheatmap::pheatmap(similarity_networks[["Condensed"]],scale='row')
-
-
 #INPUT FORMAT
 getwd()
 
@@ -128,20 +117,21 @@ repertoireH3$junction=as.factor(repertoireH3$junction)
 repertoireH3$v_call=as.character(repertoireH3$v_call)
 repertoireH3$d_call=as.factor(repertoireH3$d_call)
 repertoireH3$j_call=as.factor(repertoireH3$j_call)
+repH3.v$`allele v_call` <- NULL
 hs_ig_h_H3 <- repertoireH3
 
 #Unifier les genes pour voir si ils sont dans le germline list
-hs_ig_h_h3v <-hs_ig_h_H3 %>% group_by(v_call) %>% filter (! duplicated(v_call))
-hs_ig_h_h3j <-hs_ig_h_H3 %>% group_by(j_call) %>% filter (! duplicated(j_call))
+hs_ig_h_H3v <-hs_ig_h_H3 %>% group_by(v_call) %>% filter (! duplicated(v_call))
+hs_ig_h_H3j <-hs_ig_h_H3 %>% group_by(j_call) %>% filter (! duplicated(j_call))
 
 list_germline_genes$hs$ig$h$V$gene
-hs_ig_h_h3v$v_call
-hs_ig_h_h3v[65,]$sequence
+hs_ig_h_H3v$v_call
+hs_ig_h_H3v[65,]$sequence
 list_germline_genes$hs$ig$h$V$sequence
-hs_ig_h_h3j$j_call
+hs_ig_h_H3j$j_call
 
-setdiff(list_germline_genes$hs$ig$h$V$gene, hs_ig_h_h3v$v_call)
-setdiff(list_germline_genes$hs$ig$h$J$gene, hs_ig_h_h3j$j_call)
+setdiff(list_germline_genes$hs$ig$h$V$gene, hs_ig_h_H3v$v_call)
+setdiff(list_germline_genes$hs$ig$h$J$gene, hs_ig_h_H3j$j_call)
 
 #replace also the sequence with the v domain sequence
 
@@ -153,6 +143,10 @@ hs_ig_h_H3$sequence <- filtered_dataH3$sequence_alignment
 # without gaps
 hs_ig_h_H3$sequence_aa <- gsub("\\.","",as.character(filtered_dataH3$sequence_alignment_aa))
 hs_ig_h_H3$sequence <- gsub("\\.","",as.character(filtered_dataH3$sequence_alignment))
+
+#suprimer NA
+library(tidyr)
+hs_ig_h_H3 <- na.omit(hs_ig_h_H3)
 
 #Dataframe containing V-gene information on new species
 df_species_VDJ<-list()
@@ -166,22 +160,31 @@ list_germline_genes$hs$ig$h$V[nrow(list_germline_genes$hs$ig$h$V) + 1,] <- df_sp
 list_germline_genes$hs$ig$h$V[nrow(list_germline_genes$hs$ig$h$V) + 1,] <- df_species_VDJ[["V3"]]
 list_germline_genes$hs$ig$h$V$gene
 
+#INPUT FORMAT
+getwd()
+
+#Ajouter bien les donees on bessoin les resultats de donees tsv POUR H4
+setwd("/Users/equipe.lefranc/Documents/Lorena Project/COVID/DONES/H4")
 
 
+dataH4 <- read.table(file = "vquest_airr.tsv", header = TRUE, fill = TRUE, sep = "\t", na.strings=c(""," ","NA"))
 
-#Ajouter bien les donees on bessoin les resultats de donees tsv H4
-setwd("/Users/equipe.lefranc/Documents/Lorena Project/COVID/DONES/H4/")
+filtered_dataH4<-dataH4[!is.na(dataH4$j_call),]
 
-dataH4 <- read.table(file = "vquest_airr.tsv", header = TRUE, fill = TRUE, sep = "\t")
+#head(dataH4)
+
+#names(dataH4)
 
 library(dplyr)
 
-tabH4 <- select(dataH4, sequence_aa, sequence, junction_aa, junction, v_call, d_call, j_call)
+tabH4 <- select(filtered_dataH4, sequence_id, sequence_aa, sequence, junction_aa, junction, v_call, d_call, j_call)
 library(immuneREF)
+
+#Calculer la freq
 
 tabFH4 <- tabH4 %>% 
   
-  group_by(sequence_aa, sequence, junction_aa, junction, v_call, d_call, j_call) %>%
+  group_by(sequence_id, sequence_aa, sequence, junction_aa, junction, v_call, d_call, j_call) %>%
   
   summarise(
     
@@ -195,9 +198,21 @@ tabFH4 <- tabH4 %>%
 
 freqs <- tabFH4$n/sum(tabFH4$n)
 sum(freqs)
-library(dplyr)
 
 RH4 <- data.frame(tabFH4)
+
+# Put the sequence_alignment_aa sequence, without gaps, in the sequence_aa coloumn  
+
+library(stringr)
+
+
+# Version two : without loop
+
+#gsub is for removing gaps from the sequences in sequence_alignment_aa column
+RH4$sequence_aa <- gsub("\\.","",as.character(filtered_dataH4$sequence_alignment_aa))
+
+
+#Separer les données de V
 
 dfvH4 <- data.frame(Name = c(RH4$v_call)) 
 
@@ -209,16 +224,13 @@ dfvH4[c('v_call', 'allele v_call')] <- str_split_fixed(dfvH4$v_callH4,"\\*", 2)
 
 dfvH4 <- dfvH4[c('v_call', 'allele v_call')]
 
-dfvH3 <- data.frame(Name = c(RH3$v_call)) 
-
-
 repH4.v <- cbind(RH4, dfvH4)
 
 repH4.v$v_call <- NULL
 repH4.v$Name <- NULL
-repH4.v$v_call1 <- NULL
-repH4.v$`allele v_call` <- NULL
+repH4.v$v_callH4 <- NULL
 
+#Separer les données de D
 
 dfdH4 <- data.frame(Name = c(RH4$d_call)) 
 
@@ -234,9 +246,10 @@ repH4.d <- cbind(repH4.v, dfdH4)
 
 repH4.d$d_call <- NULL
 repH4.d$Name <- NULL
-repH4.d$d_call1 <- NULL
+repH4.d$d_callH4 <- NULL
 repH4.d$`allele d_call` <- NULL
 
+#Separer les données de J
 
 dfjH4 <- data.frame(Name = c(RH4$j_call)) 
 
@@ -252,9 +265,11 @@ repH4.j <- cbind(repH4.d, dfjH4, freqs)
 
 repH4.j$j_call <- NULL
 repH4.j$Name <- NULL
-repH4.j$j_call1 <- NULL
+repH4.j$j_callH4 <- NULL
 repH4.j$`allele j_call` <- NULL
 repH4.j$n <- NULL
+
+#Changer le format de répertoires
 
 repertoireH4 <- data.frame(repH4.j)
 repertoireH4$sequence_aa=as.factor(repertoireH4$sequence_aa)
@@ -263,33 +278,64 @@ repertoireH4$junction_aa=as.factor(repertoireH4$junction_aa)
 repertoireH4$junction=as.factor(repertoireH4$junction)
 repertoireH4$v_call=as.character(repertoireH4$v_call)
 repertoireH4$d_call=as.factor(repertoireH4$d_call)
-repertoireH4$j_call=as.character(repertoireH4$j_call)
+repertoireH4$j_call=as.factor(repertoireH4$j_call)
+repH4.v$`allele v_call` <- NULL
 hs_ig_h_H4 <- repertoireH4
 
-hs_ig_h_h4v <-hs_ig_h_H4 %>% group_by(v_call) %>% filter (! duplicated(v_call))
-hs_ig_h_h4j <-hs_ig_h_H4 %>% group_by(j_call) %>% filter (! duplicated(j_call))
-
-hs_ig_h_H4$j_call[hs_ig_h_H4$j_call == ""] <- "NA"
+#Unifier les genes pour voir si ils sont dans le germline list
+hs_ig_h_H4v <-hs_ig_h_H4 %>% group_by(v_call) %>% filter (! duplicated(v_call))
+hs_ig_h_H4j <-hs_ig_h_H4 %>% group_by(j_call) %>% filter (! duplicated(j_call))
 
 list_germline_genes$hs$ig$h$V$gene
-hs_ig_h_h4v$v_call
-list_germline_genes$hs$ig$h$J$gene
-hs_ig_h_h4j$j_call
+hs_ig_h_H4v$v_call
+hs_ig_h_H4v[65,]$sequence
+list_germline_genes$hs$ig$h$V$sequence
+hs_ig_h_H4j$j_call
+
+setdiff(list_germline_genes$hs$ig$h$V$gene, hs_ig_h_H4v$v_call)
+setdiff(list_germline_genes$hs$ig$h$J$gene, hs_ig_h_H4j$j_call)
+
+#replace also the sequence with the v domain sequence
+
+# with gaps
+hs_ig_h_H4$sequence_aa <- filtered_dataH4$sequence_alignment_aa   
+hs_ig_h_H4$sequence <- filtered_dataH4$sequence_alignment
 
 
-#Ajouter bien les donees on bessoin les resultats de donees tsv de M5
-setwd("/Users/equipe.lefranc/Documents/Lorena Project/COVID/DONES/M5/")
+# without gaps
+hs_ig_h_H4$sequence_aa <- gsub("\\.","",as.character(filtered_dataH4$sequence_alignment_aa))
+hs_ig_h_H4$sequence <- gsub("\\.","",as.character(filtered_dataH4$sequence_alignment))
 
-dataM5 <- read.table(file = "vquest_airr.tsv", header = TRUE, fill = TRUE, sep = "\t")
+#suprimer NA
+library(tidyr)
+hs_ig_h_H4 <- na.omit(hs_ig_h_H4)
+
+
+#INPUT FORMAT
+getwd()
+
+#Ajouter bien les donees on bessoin les resultats de donees tsv POUR M5
+setwd("/Users/equipe.lefranc/Documents/Lorena Project/COVID/DONES/M5")
+
+
+dataM5 <- read.table(file = "vquest_airr.tsv", header = TRUE, fill = TRUE, sep = "\t", na.strings=c(""," ","NA"))
+
+filtered_dataM5<-dataM5[!is.na(dataM5$j_call),]
+
+#head(dataM5)
+
+#names(dataM5)
 
 library(dplyr)
 
-tabM5 <- select(dataM5, sequence_aa, sequence, junction_aa, junction, v_call, d_call, j_call)
+tabM5 <- select(filtered_dataM5, sequence_id, sequence_aa, sequence, junction_aa, junction, v_call, d_call, j_call)
 library(immuneREF)
+
+#Calculer la freq
 
 tabFM5 <- tabM5 %>% 
   
-  group_by(sequence_aa, sequence, junction_aa, junction, v_call, d_call, j_call) %>%
+  group_by(sequence_id, sequence_aa, sequence, junction_aa, junction, v_call, d_call, j_call) %>%
   
   summarise(
     
@@ -303,9 +349,21 @@ tabFM5 <- tabM5 %>%
 
 freqs <- tabFM5$n/sum(tabFM5$n)
 sum(freqs)
-library(dplyr)
 
 RM5 <- data.frame(tabFM5)
+
+# Put the sequence_alignment_aa sequence, without gaps, in the sequence_aa coloumn  
+
+library(stringr)
+
+
+# Version two : without loop
+
+#gsub is for removing gaps from the sequences in sequence_alignment_aa column
+RM5$sequence_aa <- gsub("\\.","",as.character(filtered_dataM5$sequence_alignment_aa))
+
+
+#Separer les données de V
 
 dfvM5 <- data.frame(Name = c(RM5$v_call)) 
 
@@ -321,9 +379,9 @@ repM5.v <- cbind(RM5, dfvM5)
 
 repM5.v$v_call <- NULL
 repM5.v$Name <- NULL
-repM5.v$v_call1 <- NULL
-repM5.v$`allele v_call` <- NULL
+repM5.v$v_callM5 <- NULL
 
+#Separer les données de D
 
 dfdM5 <- data.frame(Name = c(RM5$d_call)) 
 
@@ -331,7 +389,7 @@ library(stringr)
 
 dfdM5[c('specie', 'd_callM5')] <- str_split_fixed(dfdM5$Name," ", 2)
 
-dfdM5[c('d_call', 'allele d_call')] <- str_split_fixed(dfdM5$d_callM5,"\\*",2)
+dfdM5[c('d_call', 'allele d_call')] <- str_split_fixed(dfdM5$d_callM5,"\\*", 2)
 
 dfdM5 <- dfdM5[c('d_call', 'allele d_call')]
 
@@ -339,9 +397,10 @@ repM5.d <- cbind(repM5.v, dfdM5)
 
 repM5.d$d_call <- NULL
 repM5.d$Name <- NULL
-repM5.d$d_call1 <- NULL
+repM5.d$d_callM5 <- NULL
 repM5.d$`allele d_call` <- NULL
 
+#Separer les données de J
 
 dfjM5 <- data.frame(Name = c(RM5$j_call)) 
 
@@ -357,9 +416,11 @@ repM5.j <- cbind(repM5.d, dfjM5, freqs)
 
 repM5.j$j_call <- NULL
 repM5.j$Name <- NULL
-repM5.j$j_call1 <- NULL
+repM5.j$j_callM5 <- NULL
 repM5.j$`allele j_call` <- NULL
 repM5.j$n <- NULL
+
+#Changer le format de répertoires
 
 repertoireM5 <- data.frame(repM5.j)
 repertoireM5$sequence_aa=as.factor(repertoireM5$sequence_aa)
@@ -368,32 +429,64 @@ repertoireM5$junction_aa=as.factor(repertoireM5$junction_aa)
 repertoireM5$junction=as.factor(repertoireM5$junction)
 repertoireM5$v_call=as.character(repertoireM5$v_call)
 repertoireM5$d_call=as.factor(repertoireM5$d_call)
-repertoireM5$j_call=as.character(repertoireM5$j_call)
+repertoireM5$j_call=as.factor(repertoireM5$j_call)
+repM5.v$`allele v_call` <- NULL
 hs_ig_h_M5 <- repertoireM5
 
-hs_ig_h_m5v <-hs_ig_h_M5 %>% group_by(v_call) %>% filter (! duplicated(v_call))
-hs_ig_h_m5j <-hs_ig_h_M5 %>% group_by(j_call) %>% filter (! duplicated(j_call))
-
-hs_ig_h_M5$j_call[hs_ig_h_M5$j_call == ""] <- "NA"
+#Unifier les genes pour voir si ils sont dans le germline list
+hs_ig_h_M5v <-hs_ig_h_M5 %>% group_by(v_call) %>% filter (! duplicated(v_call))
+hs_ig_h_M5j <-hs_ig_h_M5 %>% group_by(j_call) %>% filter (! duplicated(j_call))
 
 list_germline_genes$hs$ig$h$V$gene
-hs_ig_h_m5v$v_call
-list_germline_genes$hs$ig$h$J$gene
-hs_ig_h_m5j$j_call
+hs_ig_h_M5v$v_call
+hs_ig_h_M5v[65,]$sequence
+list_germline_genes$hs$ig$h$V$sequence
+hs_ig_h_M5j$j_call
 
-#Ajouter bien les donees on bessoin les resultats de donees tsv de M6
-setwd("/Users/equipe.lefranc/Documents/Lorena Project/COVID/DONES/M6/")
+setdiff(list_germline_genes$hs$ig$h$V$gene, hs_ig_h_M5v$v_call)
+setdiff(list_germline_genes$hs$ig$h$J$gene, hs_ig_h_M5j$j_call)
 
-dataM6 <- read.table(file = "vquest_airr.tsv", header = TRUE, fill = TRUE, sep = "\t")
+#replace also the sequence with the v domain sequence
+
+# with gaps
+hs_ig_h_M5$sequence_aa <- filtered_dataM5$sequence_alignment_aa   
+hs_ig_h_M5$sequence <- filtered_dataM5$sequence_alignment
+
+
+# without gaps
+hs_ig_h_M5$sequence_aa <- gsub("\\.","",as.character(filtered_dataM5$sequence_alignment_aa))
+hs_ig_h_M5$sequence <- gsub("\\.","",as.character(filtered_dataM5$sequence_alignment))
+
+#suprimer NA
+library(tidyr)
+hs_ig_h_M5 <- na.omit(hs_ig_h_M5)
+
+
+#INPUT FORMAT
+getwd()
+
+#Ajouter bien les donees on bessoin les resultats de donees tsv POUR M6
+setwd("/Users/equipe.lefranc/Documents/Lorena Project/COVID/DONES/M6")
+
+
+dataM6 <- read.table(file = "vquest_airr.tsv", header = TRUE, fill = TRUE, sep = "\t", na.strings=c(""," ","NA"))
+
+filtered_dataM6<-dataM6[!is.na(dataM6$j_call),]
+
+#head(dataM6)
+
+#names(dataM6)
 
 library(dplyr)
 
-tabM6 <- select(dataM6, sequence_aa, sequence, junction_aa, junction, v_call, d_call, j_call)
+tabM6 <- select(filtered_dataM6, sequence_id, sequence_aa, sequence, junction_aa, junction, v_call, d_call, j_call)
 library(immuneREF)
+
+#Calculer la freq
 
 tabFM6 <- tabM6 %>% 
   
-  group_by(sequence_aa, sequence, junction_aa, junction, v_call, d_call, j_call) %>%
+  group_by(sequence_id, sequence_aa, sequence, junction_aa, junction, v_call, d_call, j_call) %>%
   
   summarise(
     
@@ -407,9 +500,21 @@ tabFM6 <- tabM6 %>%
 
 freqs <- tabFM6$n/sum(tabFM6$n)
 sum(freqs)
-library(dplyr)
 
 RM6 <- data.frame(tabFM6)
+
+# Put the sequence_alignment_aa sequence, without gaps, in the sequence_aa coloumn  
+
+library(stringr)
+
+
+# Version two : without loop
+
+#gsub is for removing gaps from the sequences in sequence_alignment_aa column
+RM6$sequence_aa <- gsub("\\.","",as.character(filtered_dataM6$sequence_alignment_aa))
+
+
+#Separer les données de V
 
 dfvM6 <- data.frame(Name = c(RM6$v_call)) 
 
@@ -425,9 +530,9 @@ repM6.v <- cbind(RM6, dfvM6)
 
 repM6.v$v_call <- NULL
 repM6.v$Name <- NULL
-repM6.v$v_call1 <- NULL
-repM6.v$`allele v_call` <- NULL
+repM6.v$v_callM6 <- NULL
 
+#Separer les données de D
 
 dfdM6 <- data.frame(Name = c(RM6$d_call)) 
 
@@ -443,9 +548,10 @@ repM6.d <- cbind(repM6.v, dfdM6)
 
 repM6.d$d_call <- NULL
 repM6.d$Name <- NULL
-repM6.d$d_call1 <- NULL
+repM6.d$d_callM6 <- NULL
 repM6.d$`allele d_call` <- NULL
 
+#Separer les données de J
 
 dfjM6 <- data.frame(Name = c(RM6$j_call)) 
 
@@ -461,9 +567,11 @@ repM6.j <- cbind(repM6.d, dfjM6, freqs)
 
 repM6.j$j_call <- NULL
 repM6.j$Name <- NULL
-repM6.j$j_call1 <- NULL
+repM6.j$j_callM6 <- NULL
 repM6.j$`allele j_call` <- NULL
 repM6.j$n <- NULL
+
+#Changer le format de répertoires
 
 repertoireM6 <- data.frame(repM6.j)
 repertoireM6$sequence_aa=as.factor(repertoireM6$sequence_aa)
@@ -472,32 +580,64 @@ repertoireM6$junction_aa=as.factor(repertoireM6$junction_aa)
 repertoireM6$junction=as.factor(repertoireM6$junction)
 repertoireM6$v_call=as.character(repertoireM6$v_call)
 repertoireM6$d_call=as.factor(repertoireM6$d_call)
-repertoireM6$j_call=as.character(repertoireM6$j_call)
-hs_ig_h_M6 <- repertoireM6 
+repertoireM6$j_call=as.factor(repertoireM6$j_call)
+repM6.v$`allele v_call` <- NULL
+hs_ig_h_M6 <- repertoireM6
 
-hs_ig_h_m6v <-hs_ig_h_M6 %>% group_by(v_call) %>% filter (! duplicated(v_call))
-hs_ig_h_m6j <-hs_ig_h_M6 %>% group_by(j_call) %>% filter (! duplicated(j_call))
-
-hs_ig_h_M6$j_call[hs_ig_h_M6$j_call == ""] <- "NA"
+#Unifier les genes pour voir si ils sont dans le germline list
+hs_ig_h_M6v <-hs_ig_h_M6 %>% group_by(v_call) %>% filter (! duplicated(v_call))
+hs_ig_h_M6j <-hs_ig_h_M6 %>% group_by(j_call) %>% filter (! duplicated(j_call))
 
 list_germline_genes$hs$ig$h$V$gene
-hs_ig_h_m6v$v_call
-list_germline_genes$hs$ig$h$J$gene
-hs_ig_h_m6j$j_call
+hs_ig_h_M6v$v_call
+hs_ig_h_M6v[65,]$sequence
+list_germline_genes$hs$ig$h$V$sequence
+hs_ig_h_M6j$j_call
 
-#Ajouter bien les donees on bessoin les resultats de donees tsv de s24
-setwd("/Users/equipe.lefranc/Documents/Lorena Project/COVID/DONES/S24/")
+setdiff(list_germline_genes$hs$ig$h$V$gene, hs_ig_h_M6v$v_call)
+setdiff(list_germline_genes$hs$ig$h$J$gene, hs_ig_h_M6j$j_call)
 
-dataS24 <- read.table(file = "vquest_airr.tsv", header = TRUE, fill = TRUE, sep = "\t")
+#replace also the sequence with the v domain sequence
+
+# with gaps
+hs_ig_h_M6$sequence_aa <- filtered_dataM6$sequence_alignment_aa   
+hs_ig_h_M6$sequence <- filtered_dataM6$sequence_alignment
+
+
+# without gaps
+hs_ig_h_M6$sequence_aa <- gsub("\\.","",as.character(filtered_dataM6$sequence_alignment_aa))
+hs_ig_h_M6$sequence <- gsub("\\.","",as.character(filtered_dataM6$sequence_alignment))
+
+#suprimer NA
+library(tidyr)
+hs_ig_h_M6 <- na.omit(hs_ig_h_M6)
+
+
+#INPUT FORMAT
+getwd()
+
+#Ajouter bien les donees on bessoin les resultats de donees tsv POUR S24
+setwd("/Users/equipe.lefranc/Documents/Lorena Project/COVID/DONES/S24")
+
+
+dataS24 <- read.table(file = "vquest_airr.tsv", header = TRUE, fill = TRUE, sep = "\t", na.strings=c(""," ","NA"))
+
+filtered_dataS24<-dataS24[!is.na(dataS24$j_call),]
+
+#head(dataS24)
+
+#names(dataS24)
 
 library(dplyr)
 
-tabS24 <- select(dataS24, sequence_aa, sequence, junction_aa, junction, v_call, d_call, j_call)
+tabS24 <- select(filtered_dataS24, sequence_id, sequence_aa, sequence, junction_aa, junction, v_call, d_call, j_call)
 library(immuneREF)
+
+#Calculer la freq
 
 tabFS24 <- tabS24 %>% 
   
-  group_by(sequence_aa, sequence, junction_aa, junction, v_call, d_call, j_call) %>%
+  group_by(sequence_id, sequence_aa, sequence, junction_aa, junction, v_call, d_call, j_call) %>%
   
   summarise(
     
@@ -511,9 +651,21 @@ tabFS24 <- tabS24 %>%
 
 freqs <- tabFS24$n/sum(tabFS24$n)
 sum(freqs)
-library(dplyr)
 
 RS24 <- data.frame(tabFS24)
+
+# Put the sequence_alignment_aa sequence, without gaps, in the sequence_aa coloumn  
+
+library(stringr)
+
+
+# Version two : without loop
+
+#gsub is for removing gaps from the sequences in sequence_alignment_aa column
+RS24$sequence_aa <- gsub("\\.","",as.character(filtered_dataS24$sequence_alignment_aa))
+
+
+#Separer les données de V
 
 dfvS24 <- data.frame(Name = c(RS24$v_call)) 
 
@@ -529,9 +681,9 @@ repS24.v <- cbind(RS24, dfvS24)
 
 repS24.v$v_call <- NULL
 repS24.v$Name <- NULL
-repS24.v$v_call1 <- NULL
-repS24.v$`allele v_call` <- NULL
+repS24.v$v_callS24 <- NULL
 
+#Separer les données de D
 
 dfdS24 <- data.frame(Name = c(RS24$d_call)) 
 
@@ -547,9 +699,10 @@ repS24.d <- cbind(repS24.v, dfdS24)
 
 repS24.d$d_call <- NULL
 repS24.d$Name <- NULL
-repS24.d$d_call1 <- NULL
+repS24.d$d_callS24 <- NULL
 repS24.d$`allele d_call` <- NULL
 
+#Separer les données de J
 
 dfjS24 <- data.frame(Name = c(RS24$j_call)) 
 
@@ -565,9 +718,11 @@ repS24.j <- cbind(repS24.d, dfjS24, freqs)
 
 repS24.j$j_call <- NULL
 repS24.j$Name <- NULL
-repS24.j$j_call1 <- NULL
+repS24.j$j_callS24 <- NULL
 repS24.j$`allele j_call` <- NULL
 repS24.j$n <- NULL
+
+#Changer le format de répertoires
 
 repertoireS24 <- data.frame(repS24.j)
 repertoireS24$sequence_aa=as.factor(repertoireS24$sequence_aa)
@@ -576,33 +731,64 @@ repertoireS24$junction_aa=as.factor(repertoireS24$junction_aa)
 repertoireS24$junction=as.factor(repertoireS24$junction)
 repertoireS24$v_call=as.character(repertoireS24$v_call)
 repertoireS24$d_call=as.factor(repertoireS24$d_call)
-repertoireS24$j_call=as.character(repertoireS24$j_call)
+repertoireS24$j_call=as.factor(repertoireS24$j_call)
+repS24.v$`allele v_call` <- NULL
 hs_ig_h_S24 <- repertoireS24
 
-hs_ig_h_s24v <-hs_ig_h_S24 %>% group_by(v_call) %>% filter (! duplicated(v_call))
-hs_ig_h_s24j <-hs_ig_h_S24 %>% group_by(j_call) %>% filter (! duplicated(j_call))
-
-hs_ig_h_S24$j_call[hs_ig_h_S24$j_call == ""] <- "NA"
+#Unifier les genes pour voir si ils sont dans le germline list
+hs_ig_h_S24v <-hs_ig_h_S24 %>% group_by(v_call) %>% filter (! duplicated(v_call))
+hs_ig_h_S24j <-hs_ig_h_S24 %>% group_by(j_call) %>% filter (! duplicated(j_call))
 
 list_germline_genes$hs$ig$h$V$gene
-hs_ig_h_s24v$v_call
-list_germline_genes$hs$ig$h$J$gene
-hs_ig_h_s24j$j_call
+hs_ig_h_S24v$v_call
+hs_ig_h_S24v[65,]$sequence
+list_germline_genes$hs$ig$h$V$sequence
+hs_ig_h_S24j$j_call
+
+setdiff(list_germline_genes$hs$ig$h$V$gene, hs_ig_h_S24v$v_call)
+setdiff(list_germline_genes$hs$ig$h$J$gene, hs_ig_h_S24j$j_call)
+
+#replace also the sequence with the v domain sequence
+
+# with gaps
+hs_ig_h_S24$sequence_aa <- filtered_dataS24$sequence_alignment_aa   
+hs_ig_h_S24$sequence <- filtered_dataS24$sequence_alignment
 
 
-#Ajouter bien les donees on bessoin les resultats de donees tsv de S26
-setwd("/Users/equipe.lefranc/Documents/Lorena Project/COVID/DONES/S26/")
+# without gaps
+hs_ig_h_S24$sequence_aa <- gsub("\\.","",as.character(filtered_dataS24$sequence_alignment_aa))
+hs_ig_h_S24$sequence <- gsub("\\.","",as.character(filtered_dataS24$sequence_alignment))
 
-dataS26 <- read.table(file = "vquest_airr.tsv", header = TRUE, fill = TRUE, sep = "\t")
+#suprimer NA
+library(tidyr)
+hs_ig_h_S24 <- na.omit(hs_ig_h_S24)
+
+
+#INPUT FORMAT
+getwd()
+
+#Ajouter bien les donees on bessoin les resultats de donees tsv POUR S26
+setwd("/Users/equipe.lefranc/Documents/Lorena Project/COVID/DONES/S26")
+
+
+dataS26 <- read.table(file = "vquest_airr.tsv", header = TRUE, fill = TRUE, sep = "\t", na.strings=c(""," ","NA"))
+
+filtered_dataS26<-dataS26[!is.na(dataS26$j_call),]
+
+#head(dataS26)
+
+#names(dataS26)
 
 library(dplyr)
 
-tabS26 <- select(dataS26, sequence_aa, sequence, junction_aa, junction, v_call, d_call, j_call)
+tabS26 <- select(filtered_dataS26, sequence_id, sequence_aa, sequence, junction_aa, junction, v_call, d_call, j_call)
 library(immuneREF)
+
+#Calculer la freq
 
 tabFS26 <- tabS26 %>% 
   
-  group_by(sequence_aa, sequence, junction_aa, junction, v_call, d_call, j_call) %>%
+  group_by(sequence_id, sequence_aa, sequence, junction_aa, junction, v_call, d_call, j_call) %>%
   
   summarise(
     
@@ -616,9 +802,21 @@ tabFS26 <- tabS26 %>%
 
 freqs <- tabFS26$n/sum(tabFS26$n)
 sum(freqs)
-library(dplyr)
 
 RS26 <- data.frame(tabFS26)
+
+# Put the sequence_alignment_aa sequence, without gaps, in the sequence_aa coloumn  
+
+library(stringr)
+
+
+# Version two : without loop
+
+#gsub is for removing gaps from the sequences in sequence_alignment_aa column
+RS26$sequence_aa <- gsub("\\.","",as.character(filtered_dataS26$sequence_alignment_aa))
+
+
+#Separer les données de V
 
 dfvS26 <- data.frame(Name = c(RS26$v_call)) 
 
@@ -634,9 +832,9 @@ repS26.v <- cbind(RS26, dfvS26)
 
 repS26.v$v_call <- NULL
 repS26.v$Name <- NULL
-repS26.v$v_call1 <- NULL
-repS26.v$`allele v_call` <- NULL
+repS26.v$v_callS26 <- NULL
 
+#Separer les données de D
 
 dfdS26 <- data.frame(Name = c(RS26$d_call)) 
 
@@ -652,9 +850,10 @@ repS26.d <- cbind(repS26.v, dfdS26)
 
 repS26.d$d_call <- NULL
 repS26.d$Name <- NULL
-repS26.d$d_call1 <- NULL
+repS26.d$d_callS26 <- NULL
 repS26.d$`allele d_call` <- NULL
 
+#Separer les données de J
 
 dfjS26 <- data.frame(Name = c(RS26$j_call)) 
 
@@ -670,9 +869,11 @@ repS26.j <- cbind(repS26.d, dfjS26, freqs)
 
 repS26.j$j_call <- NULL
 repS26.j$Name <- NULL
-repS26.j$j_call1 <- NULL
+repS26.j$j_callS26 <- NULL
 repS26.j$`allele j_call` <- NULL
 repS26.j$n <- NULL
+
+#Changer le format de répertoires
 
 repertoireS26 <- data.frame(repS26.j)
 repertoireS26$sequence_aa=as.factor(repertoireS26$sequence_aa)
@@ -681,22 +882,41 @@ repertoireS26$junction_aa=as.factor(repertoireS26$junction_aa)
 repertoireS26$junction=as.factor(repertoireS26$junction)
 repertoireS26$v_call=as.character(repertoireS26$v_call)
 repertoireS26$d_call=as.factor(repertoireS26$d_call)
-repertoireS26$j_call=as.character(repertoireS26$j_call)
+repertoireS26$j_call=as.factor(repertoireS26$j_call)
+repS26.v$`allele v_call` <- NULL
 hs_ig_h_S26 <- repertoireS26
 
+#Unifier les genes pour voir si ils sont dans le germline list
 hs_ig_h_S26v <-hs_ig_h_S26 %>% group_by(v_call) %>% filter (! duplicated(v_call))
 hs_ig_h_S26j <-hs_ig_h_S26 %>% group_by(j_call) %>% filter (! duplicated(j_call))
 
-hs_ig_h_S26$j_call[hs_ig_h_S26$j_call == ""] <- "NA"
-
 list_germline_genes$hs$ig$h$V$gene
 hs_ig_h_S26v$v_call
-list_germline_genes$hs$ig$h$J$gene
+hs_ig_h_S26v[65,]$sequence
+list_germline_genes$hs$ig$h$V$sequence
 hs_ig_h_S26j$j_call
+
+setdiff(list_germline_genes$hs$ig$h$V$gene, hs_ig_h_S26v$v_call)
+setdiff(list_germline_genes$hs$ig$h$J$gene, hs_ig_h_S26j$j_call)
+
+#replace also the sequence with the v domain sequence
+
+# with gaps
+hs_ig_h_S26$sequence_aa <- filtered_dataS26$sequence_alignment_aa   
+hs_ig_h_S26$sequence <- filtered_dataS26$sequence_alignment
+
+
+# without gaps
+hs_ig_h_S26$sequence_aa <- gsub("\\.","",as.character(filtered_dataS26$sequence_alignment_aa))
+hs_ig_h_S26$sequence <- gsub("\\.","",as.character(filtered_dataS26$sequence_alignment))
+
+#suprimer NA
+library(tidyr)
+hs_ig_h_S26 <- na.omit(hs_ig_h_S26)
 
 repertoires <- list(hs_ig_h_H3 = hs_ig_h_H3, hs_ig_h_H4= hs_ig_h_H4, hs_ig_h_M5= hs_ig_h_M5, hs_ig_h_M6= hs_ig_h_M6, hs_ig_h_S24= hs_ig_h_S24, hs_ig_h_S26= hs_ig_h_S26)
 
-compatibility_check(repertoire = hs_ig_h_H3 , species = "hs", receptor = "igh") #pour lancer ça on doit activer toujours avant la library(immuneREF)
+compatibility_check(repertoire = repertoires[[1]] , species = "hs", receptor = "igh") #pour lancer ça on doit activer toujours avant la library(immuneREF)
 
 #repertoires[[1]]
 
@@ -738,6 +958,7 @@ list_repertoires<-subset_input_repertoires(list_repertoires=list_repertoires,
 # Calculate all features for each repertoire
 
 repertoires_analyzed<-list()
+
 for(i in 1:length(list_repertoires)){
   repertoires_analyzed[[repertoire_names[i]]]<-calc_characteristics(
     repertoire_df=list_repertoires[[i]],
@@ -780,7 +1001,7 @@ cormat <- condense_layers(list_single_layers,
 #VISUALIZATION OF RESULTS
 # Draw heatmap of immuneREF layers
 
-dir.create("figures")
+dir.create("figures3")
 
 list_all_layers <- list_single_layers
 list_all_layers[["Condensed"]] <- cormat
@@ -794,7 +1015,7 @@ annotation_list[["colors"]]<-list(Species=c(mm='#ffffbf',hs='#fc8d59'),
 
 print_heatmap_sims(list_similarity_matrices=list_all_layers,
                    annotation_list=annotation_list,
-                   path_figure="figures")
+                   path_figure="figures3")
 
 
 #Calculate network features of condensed immuneREF layer
@@ -809,13 +1030,13 @@ categories_list[["subset"]]<-"species"
 
 print_global_similarity(list_similarity_matrices=list_all_layers,
                         categories_list = categories_list,
-                        path_figure="figures")
+                        path_figure="figures3")
 
 # Plot local similarity per category and identify max and min locally similar repertoires
 
 max_min_reps<-print_local_similarity(list_similarity_matrices=list_all_layers,
                                      categories_list = categories_list,
-                                     path_figure="figures")
+                                     path_figure="figures3")
 
 
 # Radar plot to visualize similarity across all 6 layers
@@ -842,25 +1063,25 @@ comparison_list<-list(roi=names(radar_list),
                       colors=c("grey","blue", "red", "yellow", "pink", "green"))
 
 comparison_list2<-list(roi=names(radar_list),
-                      roi_names=c(
-                        "HEALTHY 3",
-                        "HEALTHY 4",
-                        "COVID 5",
-                        "COVID 6",
-                        "SEVERE COVID 24",
-                        "SEVERE COVID 26"),
-                      ref="hs_ig_h_H4",
-                      plot_names=c("HEALTHY 3","HEALTHY 4", "COVID 5", "COVID 6", "SEVERE COVID 24", "SEVERE COVID 26"),
-                      colors=c("grey","blue", "red", "yellow", "pink", "green"))
+                       roi_names=c(
+                         "HEALTHY 3",
+                         "HEALTHY 4",
+                         "COVID 5",
+                         "COVID 6",
+                         "SEVERE COVID 24",
+                         "SEVERE COVID 26"),
+                       ref="hs_ig_h_H4",
+                       plot_names=c("HEALTHY 3","HEALTHY 4", "COVID 5", "COVID 6", "SEVERE COVID 24", "SEVERE COVID 26"),
+                       colors=c("grey","blue", "red", "yellow", "pink", "green"))
 
 
 print_repertoire_radar(list_similarity_matrices=list_single_layers,
                        to_compare=comparison_list,
-                       path_figure="figures",
+                       path_figure="figures3",
                        name_plot="tutorial")
 print_repertoire_radar(list_similarity_matrices=list_single_layers,
                        to_compare=comparison_list2,
-                       path_figure="figures",
+                       path_figure="figures3",
                        name_plot="tutorial")
 
 # Classical repertoire analysis of maximally and minimally similar repertoires per category
@@ -871,7 +1092,7 @@ print_repertoire_radar(list_similarity_matrices=list_single_layers,
 
 #mm_igh[["mm_ig_h_4_0__0_0_0_A"]]<-repertoires_analyzed[["mm_ig_h_4_0__0_0_0_A"]]
 
-#print_repertoire_comparison(list_repertoires=mm_igh,name_plots="mm_igh",aa_freq_length=14,path_figure="figures")
+#print_repertoire_comparison(list_repertoires=mm_igh,name_plots="mm_igh",aa_freq_length=14,path_figure="figures3")
 
 hs_igh<-list()
 
@@ -890,6 +1111,4 @@ hs_igh[["hs_ig_h_S26"]]<-repertoires_analyzed[["hs_ig_h_S26"]]
 print_repertoire_comparison(list_repertoires=hs_igh,
                             name_plots="hs_igh",
                             aa_freq_length=17,
-                            path_figure="figures")
-
-rlang::last_error()
+                            path_figure="figures3")
