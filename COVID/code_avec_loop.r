@@ -1,19 +1,3 @@
-# Comparer 6 répertoires de IGH Homo sapiens avec 3 types des données: COVID +++ (S24,S26), COVID+ (M5, M6) et COVID - (H3, H4).
-# Les datas ont été téléchargés dans le ireceptor-public-archives(chercher des information sur les données).
-# Les séquences ont été analysés par IMGT/HighV-quest et la sortie a été récuperé en format AIRR (vquest_airr.tsv).
-
-library(dplyr)
-library(immuneREF)
-library(stringr)
-library(tidyr)
-
-
-
-
-getwd()
-rep <- c("H3", "H4", "M5", "M6", "S24", "S26")
-# Adresse du dossier qui contienne le fichier AIRR pour le répertoire H3
-setwd("/Users/equipe.lefranc/Documents/Lorena Project/COVID/DONES")
 list.files()
 for (i in 1:length(rep)){
   setwd("C:/Users/equipe.lefranc/Documents")
@@ -193,7 +177,7 @@ rm(repertoire)
 
 ls()
 
-repertoires <- list(hs_ig_h_H3 = hs_ig_h_H3, hs_ig_h_H4= hs_ig_h_H4, hs_ig_h_M5= hs_ig_h_M5, hs_ig_h_M6= hs_ig_h_M6, hs_ig_h_S24= hs_ig_h_S24, hs_ig_h_S26= hs_ig_h_S26)
+repertoires <- list(hs_ig_h_H3 = hs_ig_h_H3, hs_ig_h_H4= hs_ig_h_H4, hs_ig_h_M5= hs_ig_h_M5,hs_ig_h_M6= hs_ig_h_M6, hs_ig_h_S24= hs_ig_h_S24, hs_ig_h_S26= hs_ig_h_S26)
 
 compatibility_check(repertoire = repertoires[[1]] , species = "hs", receptor = "igh") #pour lancer ça on doit activer toujours avant la library(immuneREF)
 
@@ -329,19 +313,8 @@ radar_list[["hs_ig_h_M6"]]<-repertoires_analyzed[["hs_ig_h_M6"]]
 radar_list[["hs_ig_h_S24"]]<-repertoires_analyzed[["hs_ig_h_S24"]]
 radar_list[["hs_ig_h_S26"]]<-repertoires_analyzed[["hs_ig_h_S26"]]
 
-comparison_list<-list(roi=names(radar_list),
-                      roi_names=c(
-                        "HEALTHY 3",
-                        "HEALTHY 4",
-                        "COVID 5",
-                        "COVID 6",
-                        "SEVERE COVID 24",
-                        "SEVERE COVID 26"),
-                      ref="hs_ig_h_H3",
-                      plot_names=c("HEALTHY 3","HEALTHY 4", "COVID 5", "COVID 6", "SEVERE COVID 24", "SEVERE COVID 26"),
-                      colors=c("grey","blue", "red", "yellow", "pink", "green"))
 
-comparison_list2<-list(roi=names(radar_list),
+comparison_list<-list(roi=names(radar_list),
                        roi_names=c(
                          "HEALTHY 3",
                          "HEALTHY 4",
@@ -349,7 +322,7 @@ comparison_list2<-list(roi=names(radar_list),
                          "COVID 6",
                          "SEVERE COVID 24",
                          "SEVERE COVID 26"),
-                       ref="hs_ig_h_H4",
+                       ref="hs_ig_h_H3",
                        plot_names=c("HEALTHY 3","HEALTHY 4", "COVID 5", "COVID 6", "SEVERE COVID 24", "SEVERE COVID 26"),
                        colors=c("grey","blue", "red", "yellow", "pink", "green"))
 
@@ -358,10 +331,7 @@ print_repertoire_radar(list_similarity_matrices=list_single_layers,
                        to_compare=comparison_list,
                        path_figure="figures",
                        name_plot="tutorial")
-print_repertoire_radar(list_similarity_matrices=list_single_layers,
-                       to_compare=comparison_list2,
-                       path_figure="figures",
-                       name_plot="tutorial")
+
 
 # Classical repertoire analysis of maximally and minimally similar repertoires per category
 
@@ -379,23 +349,211 @@ hs_igh[["hs_ig_h_H3"]]<-repertoires_analyzed[["hs_ig_h_H3"]]
 
 hs_igh[["hs_ig_h_H4"]]<-repertoires_analyzed[["hs_ig_h_H4"]]
 
+#hs_igh[["hs_ig_h_M5"]]<-repertoires_analyzed[["hs_ig_h_M5"]]
+
+#hs_igh[["hs_ig_h_M6"]]<-repertoires_analyzed[["hs_ig_h_M6"]]
+
+#hs_igh[["hs_ig_h_S24"]]<-repertoires_analyzed[["hs_ig_h_S24"]]
+
+#hs_igh[["hs_ig_h_S26"]]<-repertoires_analyzed[["hs_ig_h_S26"]]
+
+print_repertoire_comparison(list_repertoires=hs_igh,
+                            name_plots="hs_igh",
+                            aa_freq_length=17,
+                            path_figure="figures")
+#VISUALIZATION OF RESULTS 2
+# Draw heatmap of immuneREF layers
+
+dir.create("figures2")
+
+comparison_list<-list(roi=names(radar_list),
+                      roi_names=c(
+                        "HEALTHY 3",
+                        "HEALTHY 4",
+                        "COVID 5",
+                        "COVID 6",
+                        "SEVERE COVID 24",
+                        "SEVERE COVID 26"),
+                      ref="hs_ig_h_H4",
+                      plot_names=c("HEALTHY 3","HEALTHY 4", "COVID 5", "COVID 6", "SEVERE COVID 24", "SEVERE COVID 26"),
+                      colors=c("grey","blue", "red", "yellow", "pink", "green"))
+
+print_repertoire_radar(list_similarity_matrices=list_single_layers,
+                       to_compare=comparison_list,
+                       path_figure="figures2",
+                       name_plot="tutorial")
+
+
+hs_igh<-list()
+
+hs_igh[["hs_ig_h_H3"]]<-repertoires_analyzed[["hs_ig_h_H3"]]
+
+#hs_igh[["hs_ig_h_H4"]]<-repertoires_analyzed[["hs_ig_h_H4"]]
+
 hs_igh[["hs_ig_h_M5"]]<-repertoires_analyzed[["hs_ig_h_M5"]]
+
+#hs_igh[["hs_ig_h_M6"]]<-repertoires_analyzed[["hs_ig_h_M6"]]
+
+#hs_igh[["hs_ig_h_S24"]]<-repertoires_analyzed[["hs_ig_h_S24"]]
+
+#hs_igh[["hs_ig_h_S26"]]<-repertoires_analyzed[["hs_ig_h_S26"]]
+
+print_repertoire_comparison(list_repertoires=hs_igh,
+                            name_plots="hs_igh",
+                            aa_freq_length=17,
+                            path_figure="figures2")
+
+#VISUALIZATION OF RESULTS 3
+dir.create("figures3")
+
+hs_igh<-list()
+
+hs_igh[["hs_ig_h_H3"]]<-repertoires_analyzed[["hs_ig_h_H3"]]
+
+#hs_igh[["hs_ig_h_H4"]]<-repertoires_analyzed[["hs_ig_h_H4"]]
+
+#hs_igh[["hs_ig_h_M5"]]<-repertoires_analyzed[["hs_ig_h_M5"]]
 
 hs_igh[["hs_ig_h_M6"]]<-repertoires_analyzed[["hs_ig_h_M6"]]
 
+#hs_igh[["hs_ig_h_S24"]]<-repertoires_analyzed[["hs_ig_h_S24"]]
+
+#hs_igh[["hs_ig_h_S26"]]<-repertoires_analyzed[["hs_ig_h_S26"]]
+
+print_repertoire_comparison(list_repertoires=hs_igh,
+                            name_plots="hs_igh",
+                            aa_freq_length=17,
+                            path_figure="figures3")
+
+#VISUALIZATION OF RESULTS 4
+dir.create("figures4")
+
+hs_igh<-list()
+
+hs_igh[["hs_ig_h_H3"]]<-repertoires_analyzed[["hs_ig_h_H3"]]
+
+#hs_igh[["hs_ig_h_H4"]]<-repertoires_analyzed[["hs_ig_h_H4"]]
+
+#hs_igh[["hs_ig_h_M5"]]<-repertoires_analyzed[["hs_ig_h_M5"]]
+
+#hs_igh[["hs_ig_h_M6"]]<-repertoires_analyzed[["hs_ig_h_M6"]]
+
 hs_igh[["hs_ig_h_S24"]]<-repertoires_analyzed[["hs_ig_h_S24"]]
+
+#hs_igh[["hs_ig_h_S26"]]<-repertoires_analyzed[["hs_ig_h_S26"]]
+
+print_repertoire_comparison(list_repertoires=hs_igh,
+                            name_plots="hs_igh",
+                            aa_freq_length=17,
+                            path_figure="figures4")
+
+#VISUALIZATION OF RESULTS 5
+dir.create("figures5")
+
+hs_igh<-list()
+
+hs_igh[["hs_ig_h_H3"]]<-repertoires_analyzed[["hs_ig_h_H3"]]
+
+#hs_igh[["hs_ig_h_H4"]]<-repertoires_analyzed[["hs_ig_h_H4"]]
+
+#hs_igh[["hs_ig_h_M5"]]<-repertoires_analyzed[["hs_ig_h_M5"]]
+
+#hs_igh[["hs_ig_h_M6"]]<-repertoires_analyzed[["hs_ig_h_M6"]]
+
+#hs_igh[["hs_ig_h_S24"]]<-repertoires_analyzed[["hs_ig_h_S24"]]
 
 hs_igh[["hs_ig_h_S26"]]<-repertoires_analyzed[["hs_ig_h_S26"]]
 
 print_repertoire_comparison(list_repertoires=hs_igh,
                             name_plots="hs_igh",
                             aa_freq_length=17,
-                            path_figure="figures")
+                            path_figure="figures5")
 
+#VISUALIZATION OF RESULTS 2.2
 
+dir.create("figures2.2")
 
+hs_igh<-list()
 
+#hs_igh[["hs_ig_h_H3"]]<-repertoires_analyzed[["hs_ig_h_H3"]]
 
+hs_igh[["hs_ig_h_H4"]]<-repertoires_analyzed[["hs_ig_h_H4"]]
 
+hs_igh[["hs_ig_h_M5"]]<-repertoires_analyzed[["hs_ig_h_M5"]]
 
+#hs_igh[["hs_ig_h_M6"]]<-repertoires_analyzed[["hs_ig_h_M6"]]
 
+#hs_igh[["hs_ig_h_S24"]]<-repertoires_analyzed[["hs_ig_h_S24"]]
+
+#hs_igh[["hs_ig_h_S26"]]<-repertoires_analyzed[["hs_ig_h_S26"]]
+
+print_repertoire_comparison(list_repertoires=hs_igh,
+                            name_plots="hs_igh",
+                            aa_freq_length=17,
+                            path_figure="figures2.2")
+
+#VISUALIZATION OF RESULTS 3.2
+dir.create("figures3.2")
+
+hs_igh<-list()
+
+#hs_igh[["hs_ig_h_H3"]]<-repertoires_analyzed[["hs_ig_h_H3"]]
+
+hs_igh[["hs_ig_h_H4"]]<-repertoires_analyzed[["hs_ig_h_H4"]]
+
+#hs_igh[["hs_ig_h_M5"]]<-repertoires_analyzed[["hs_ig_h_M5"]]
+
+hs_igh[["hs_ig_h_M6"]]<-repertoires_analyzed[["hs_ig_h_M6"]]
+
+#hs_igh[["hs_ig_h_S24"]]<-repertoires_analyzed[["hs_ig_h_S24"]]
+
+#hs_igh[["hs_ig_h_S26"]]<-repertoires_analyzed[["hs_ig_h_S26"]]
+
+print_repertoire_comparison(list_repertoires=hs_igh,
+                            name_plots="hs_igh",
+                            aa_freq_length=17,
+                            path_figure="figures3.2")
+
+#VISUALIZATION OF RESULTS 4.2
+dir.create("figures4.2")
+
+hs_igh<-list()
+
+#hs_igh[["hs_ig_h_H3"]]<-repertoires_analyzed[["hs_ig_h_H3"]]
+
+hs_igh[["hs_ig_h_H4"]]<-repertoires_analyzed[["hs_ig_h_H4"]]
+
+#hs_igh[["hs_ig_h_M5"]]<-repertoires_analyzed[["hs_ig_h_M5"]]
+
+#hs_igh[["hs_ig_h_M6"]]<-repertoires_analyzed[["hs_ig_h_M6"]]
+
+hs_igh[["hs_ig_h_S24"]]<-repertoires_analyzed[["hs_ig_h_S24"]]
+
+#hs_igh[["hs_ig_h_S26"]]<-repertoires_analyzed[["hs_ig_h_S26"]]
+
+print_repertoire_comparison(list_repertoires=hs_igh,
+                            name_plots="hs_igh",
+                            aa_freq_length=17,
+                            path_figure="figures4.2")
+
+#VISUALIZATION OF RESULTS 5.2
+dir.create("figures5.2")
+
+hs_igh<-list()
+
+#hs_igh[["hs_ig_h_H3"]]<-repertoires_analyzed[["hs_ig_h_H3"]]
+
+hs_igh[["hs_ig_h_H4"]]<-repertoires_analyzed[["hs_ig_h_H4"]]
+
+#hs_igh[["hs_ig_h_M5"]]<-repertoires_analyzed[["hs_ig_h_M5"]]
+
+#hs_igh[["hs_ig_h_M6"]]<-repertoires_analyzed[["hs_ig_h_M6"]]
+
+#hs_igh[["hs_ig_h_S24"]]<-repertoires_analyzed[["hs_ig_h_S24"]]
+
+hs_igh[["hs_ig_h_S26"]]<-repertoires_analyzed[["hs_ig_h_S26"]]
+
+print_repertoire_comparison(list_repertoires=hs_igh,
+                            name_plots="hs_igh",
+                            aa_freq_length=17,
+                            path_figure="figures5.2")
