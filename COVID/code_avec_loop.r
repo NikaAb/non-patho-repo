@@ -11,8 +11,7 @@ library(tidyr)
 
 
 getwd()
-rep <- c("H3")
-#, "H4", "M5", "M6", "S24", "S26")
+rep <- c("H3", "H4", "M5", "M6", "S24", "S26")
 # Adresse du dossier qui contienne le fichier AIRR pour le répertoire H3
 setwd("/Users/equipe.lefranc/Documents/Lorena Project/COVID/DONES")
 list.files()
@@ -45,14 +44,14 @@ local_var$sequence <- gsub("\\.","",
                            as.character(local_var$sequence_alignment))
 
 # On recupere les colonnes nécessaires pour lancer immuneREF
-local_var <- select(local_var, sequence_id, sequence_aa, sequence, 
+format_immuneref <- select(local_var, sequence_aa, sequence, 
                     junction_aa, junction, v_call, d_call, j_call)
  
 
 
 #Ajouter la colonne de fréquence et regroupe les séquences identiques
 
-local_var <- local_var %>% 
+format_immuneref <- format_immuneref %>% 
   
   group_by(sequence_aa, sequence, junction_aa, junction, v_call, d_call, 
            j_call) %>%
@@ -69,64 +68,66 @@ local_var <- local_var %>%
 
 
 # Calculer la fréquence et vérifier si la sume des fréquences est égale à 1
-freqs <- local_var$n/sum(local_var$n)
+freqs <- format_immuneref$n/sum(format_immuneref$n)
 sum(freqs)
 
 
 #Creer un data frame
-local_var <- data.frame(local_var)
+df <- data.frame(format_immuneref)
 
 
 #Mis en format les noms des genes de V_call. J'enleve les nom de spece er ce qui
 #est apres l'étoile (allele) [HACERLO POR PARTES Y UNIRLO AL FINAL!!!!!!!!!!]
 
-dfv <- data.frame(Name = c(local_var$v_call)) 
+dfv <- data.frame(Namev = c(df$v_call)) 
 
-dfv[c('specie', 'v_call')] <- str_split_fixed(dfv$Name," ", 2)
+dfv[c('specie', 'v_call1')] <- str_split_fixed(dfv$Name," ", 2)
 
-dfv[c('v_call', 'allele v_call')] <- str_split_fixed(dfv$v_call,"\\*", 2)
+dfv[c('v_call', 'allele v_call')] <- str_split_fixed(dfv$v_call1,"\\*", 2)
 
 dfv <- dfv[c('v_call', 'allele v_call')]
-
-dfv$v_call <- NULL
-dfv$Name <- NULL
-dfv$v_call <- NULL
 
 
 #Separer les données de D
 
-dfd <- data.frame(Name = c(local_var$d_call)) 
+dfd <- data.frame(Named = c(df$d_call)) 
 
-dfd[c('specie', 'd_call')] <- str_split_fixed(dfd$Name," ", 2)
+dfd[c('specie', 'd_call1')] <- str_split_fixed(dfd$Name," ", 2)
 
 dfd[c('d_call', 'allele d_call')] <- str_split_fixed(dfd$d_call,"\\*", 2)
 
 dfd <- dfd[c('d_call', 'allele d_call')]
 
 
-dfd$d_call <- NULL
-dfd$Name <- NULL
-dfd$d_call <- NULL
-dfd$`allele d_call` <- NULL
-
 
 #Separer les données de J
 
-dfj <- data.frame(Name = c(local_var$j_call)) 
+dfj <- data.frame(Namej = c(df$j_call)) 
 
-dfj[c('specie', 'j_call')] <- str_split_fixed(dfj$Name," ", 2)
+dfj[c('specie', 'j_call1')] <- str_split_fixed(dfj$Name," ", 2)
 
-dfj[c('j_call', 'allele j_call')] <- str_split_fixed(dfj$j_call,"\\*", 2)
+dfj[c('j_call', 'allele j_call')] <- str_split_fixed(dfj$j_call1,"\\*", 2)
 
 dfj <- dfj[c('j_call', 'allele j_call')]
 
-dfj$j_call <- NULL
-dfj$Name <- NULL
-dfj$j_call <- NULL
-dfj$`allele j_call` <- NULL
 
 
-repertoire <- cbind(local_var, dfv, dfd,  dfj, freqs)
+repertoire <- cbind(df, dfv, dfd,  dfj, freqs)
+repertoire$v_call <- NULL
+repertoire$Namev <- NULL
+repertoire$v_call1 <- NULL
+
+repertoire$d_call <- NULL
+repertoire$Named <- NULL
+repertoire$d_call1 <- NULL
+repertoire$`allele d_call` <- NULL
+
+
+repertoire$j_call <- NULL
+repertoire$Namej <- NULL
+repertoire$j_call1 <- NULL
+repertoire$`allele j_call` <- NULL
+
 repertoire$n <- NULL
 
 
@@ -140,7 +141,7 @@ repertoire$junction=as.factor(repertoire$junction)
 repertoire$v_call=as.factor(repertoire$v_call)
 repertoire$d_call=as.factor(repertoire$d_call)
 repertoire$j_call=as.factor(repertoire$j_call)
-dfv$`allele v_call` <- NULL
+repertoire$`allele v_call` <- NULL
 
 #Le format de nom de répertoire est le suivant:
 #nomdespece_locus_chaine_nomrépertoire
@@ -177,6 +178,7 @@ list_germline_genes$hs$ig$h$V$gene
 #suprimer les séquences qui ont des valeurs NA (annotation incomplete)
 hs_ig_h_ <- na.omit(hs_ig_h_)
 assign(paste("hs_ig_h_", rep[i], sep = ""), hs_ig_h_)
+}
 
 rm(hs_ig_h_)
 rm(local_var)
@@ -187,7 +189,7 @@ rm(dfv)
 rm(freqs)
 rm(file_name)
 rm(repertoire)
-}
+
 
 ls()
 
@@ -278,7 +280,7 @@ cormat <- condense_layers(list_single_layers,
 #VISUALIZATION OF RESULTS
 # Draw heatmap of immuneREF layers
 
-dir.create("figures3")
+dir.create("figures")
 
 list_all_layers <- list_single_layers
 list_all_layers[["Condensed"]] <- cormat
@@ -292,7 +294,7 @@ annotation_list[["colors"]]<-list(Species=c(mm='#ffffbf',hs='#fc8d59'),
 
 print_heatmap_sims(list_similarity_matrices=list_all_layers,
                    annotation_list=annotation_list,
-                   path_figure="figures3")
+                   path_figure="figures")
 
 
 #Calculate network features of condensed immuneREF layer
@@ -307,13 +309,13 @@ categories_list[["subset"]]<-"species"
 
 print_global_similarity(list_similarity_matrices=list_all_layers,
                         categories_list = categories_list,
-                        path_figure="figures3")
+                        path_figure="figures")
 
 # Plot local similarity per category and identify max and min locally similar repertoires
 
 max_min_reps<-print_local_similarity(list_similarity_matrices=list_all_layers,
                                      categories_list = categories_list,
-                                     path_figure="figures3")
+                                     path_figure="figures")
 
 
 # Radar plot to visualize similarity across all 6 layers
@@ -354,11 +356,11 @@ comparison_list2<-list(roi=names(radar_list),
 
 print_repertoire_radar(list_similarity_matrices=list_single_layers,
                        to_compare=comparison_list,
-                       path_figure="figures3",
+                       path_figure="figures",
                        name_plot="tutorial")
 print_repertoire_radar(list_similarity_matrices=list_single_layers,
                        to_compare=comparison_list2,
-                       path_figure="figures3",
+                       path_figure="figures",
                        name_plot="tutorial")
 
 # Classical repertoire analysis of maximally and minimally similar repertoires per category
@@ -369,7 +371,7 @@ print_repertoire_radar(list_similarity_matrices=list_single_layers,
 
 #mm_igh[["mm_ig_h_4_0__0_0_0_A"]]<-repertoires_analyzed[["mm_ig_h_4_0__0_0_0_A"]]
 
-#print_repertoire_comparison(list_repertoires=mm_igh,name_plots="mm_igh",aa_freq_length=14,path_figure="figures3")
+#print_repertoire_comparison(list_repertoires=mm_igh,name_plots="mm_igh",aa_freq_length=14,path_figure="figures")
 
 hs_igh<-list()
 
@@ -388,7 +390,7 @@ hs_igh[["hs_ig_h_S26"]]<-repertoires_analyzed[["hs_ig_h_S26"]]
 print_repertoire_comparison(list_repertoires=hs_igh,
                             name_plots="hs_igh",
                             aa_freq_length=17,
-                            path_figure="figures3")
+                            path_figure="figures")
 
 
 
