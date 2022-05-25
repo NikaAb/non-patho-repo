@@ -1,0 +1,15 @@
+install.packages(c("reshape2", "data.table", "ggplot2", "shiny", "shinyjs", "colourpicker", "gridExtra", "DT", "plotly", "htmlwidgets", "png", "dendextend")) # Choose the website you want to download the package from, you should choose "France" (or another country)
+wspace <- getwd()# Press ENTER
+dest =paste(wspace,"/d3heatmap_0.6.1.tar.gz",sep="")# Press ENTER
+download.file("http://www.imgt.org/download/StatClonotype/d3heatmap_0.6.1.tar.gz",destfile=dest)# Press ENTER
+install.packages("d3heatmap_0.6.1.tar.gz", repos=NULL)# Press ENTER
+if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager")# Press ENTER
+BiocManager::install("multtest") # If a message appears to update a list of package (Update all/some/none? [a/s/n]) type n then press ENTER
+n
+
+des=paste(wspace,"/IMGTStatClonotype_1.0.4.tar.gz",sep="")# Press ENTER
+download.file("http://www.imgt.org/download/StatClonotype/IMGTStatClonotype_1.0.4.tar.gz",destfile=des)# Press ENTER
+install.packages("IMGTStatClonotype_1.0.4.tar.gz", repos=NULL)# Press ENTER
+
+library(IMGTStatClonotype)# Press ENTER
+launch() # Press ENTER
